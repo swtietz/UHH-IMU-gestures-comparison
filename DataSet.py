@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import csv
 from Utils import getProjectPath
 #import Main
+import os
 
 
 class DataSet(object):
@@ -162,8 +163,9 @@ def normFused(X):
     return np.linalg.norm(X[:,0:3], None, 1) 
 
         
-def createDataSetFromFile(fileName):
-    data = np.load(getProjectPath()+'dataSets/'+fileName)
+def createDataSetFromFile(fileName, dataDir='dataSets/'):
+    
+    data = np.load(os.path.join(getProjectPath(),dataDir,fileName))
     fused = data['fused']
     gyro = data['gyro']
     acc = data['acc']
@@ -184,11 +186,11 @@ def appendDS(dataSets, usedGestures):
                   dataSets[i].getDataForTraining(usedGestures,2)[1],0))
     return result
 
-def createData(dataSetName, inputGestures, usedGestures, scaleFactor = 1):
+def createData(dataSetName, inputGestures, usedGestures, scaleFactor = 1, dataDir='dataSets/'):
     dataSets= []
     for gesture in inputGestures:
         fullName = dataSetName + '_' +str(gesture) + '_' + 'fullSet.npz'
-        dataSets.append(createDataSetFromFile(fullName))
+        dataSets.append(createDataSetFromFile(fullName, dataDir=dataDir))
     resultInputs,resultTargets = appendDS(dataSets, inputGestures)
     inds = np.where(np.in1d(inputGestures, usedGestures))[0]
     
