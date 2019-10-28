@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-from sklearn.cluster.mean_shift_ import MeanShift
 from Utils import getProjectPath
 #import Main
 
@@ -99,9 +98,10 @@ class DataSet(object):
                 tLen = tLen + 1
                 i = i+1
             if tLen != 0:
+
                 dropArea = np.min([tLen-5,tLen*(1/4)])
                 #target[i-dropArea:i,2]=0
-                target[i-tLen:i-tLen+dropArea,2]=0
+                target[int(i-tLen):int(i-tLen+dropArea),2]=0
             i = i+1   
         
         readOutTrainingData = np.zeros((len(inputData),len(classNrs)))
@@ -154,7 +154,7 @@ class DataSet(object):
         
     
 def normPower(X):
-    print X.shape
+    print(X.shape)
     return np.linalg.norm(X[:,6:9], None, 1) 
 def normRot(X):
     return np.linalg.norm(X[:,3:6], None, 1) 
