@@ -6,6 +6,114 @@ from Utils import getProjectPath
 import os
 
 
+
+from torch.utils.data import Dataset as TorchDataset
+
+from Utils import shuffleDataStep
+
+class UniHHIMUGestures(TorchDataset):
+    
+
+    def __init__(self, 
+                 dataDir='dataSets/',
+                 inputFiles=['nike','julian','nadja','line'], testFiles=['stephan'], train=True, 
+                 inputGestures=[0,1,2,3,4,5,6,7,8,9], 
+                 usedGestures=[0,1,2,3,4,5,6,7,8,9], 
+                 useNormalized=2, 
+                 shuffle=True, nFolds=4, nRepeat=1, noiseFactor=1, learnTreshold=False):
+        """
+        Args:
+            inputFiles (list<string>): Files/people to be used in trainset.
+            testFiles (list<string>): Files/people to be used in testset.
+            train (bool): wether or not the get method will return train or test samples
+            useNormalized (int): normalisation of input signal. 
+                0: no normalisation
+                1: scale each sensors std to 1
+                2: scale each sensors max value to 1 
+        """
+        
+        
+        self.train = train
+        self.useNormalized = useNormalized
+        
+        
+        # ===================================================================
+        # Create trainset
+        # ===================================================================
+        
+        
+        dataStep = []
+        for fileName in inputFiles:
+            ind, t  = createData(fileName, inputGestures,usedGestures, dataDir=dataDir)
+            dataStep.append((ind,t))
+
+        # calculate normalizers from train files
+        inputs = np.concatenate([inputs for inputs, targets in dataStep])
+        self.normalizer = np.ones(9)
+        if self.useNormalized == 1:
+            self.normalizer[0:3] = np.std(np.linalg.norm(inputs[:,0:3], None, 1))
+            self.normalizer[3:6] = np.std(np.linalg.norm(inputs[:,3:6], None, 1))
+            self.normalizer[6:9] = np.std(np.linalg.norm(inputs[:,6:9], None, 1))
+        if self.useNormalized == 2:
+            self.normalizer[0:3] = np.max(np.linalg.norm(inputs[:,0:3], None, 1))
+            self.normalizer[3:6] = np.max(np.linalg.norm(inputs[:,3:6], None, 1))
+            self.normalizer[6:9] = np.max(np.linalg.norm(inputs[:,6:9], None, 1))
+
+            
+        # if desired shuffle and rearrage the data in nFolds
+        # each fold can contain gestures from each person in the trainset, but not from the testset person 
+        if(shuffle):
+            dataStep = shuffleDataStep(dataStep, nFolds=nFolds, nRepeat=nRepeat)
+
+
+        self.train_data = []
+        for ind, t in dataStep:
+
+            ind[:,0:3] += np.random.normal(0,0.05 *noiseFactor, size=(len(ind),3))
+            ind[:,3:6] += np.random.normal(0,0.5 * noiseFactor, size=(len(ind),3))
+            ind[:,6:9] += np.random.normal(0,1.25 * noiseFactor, size=(len(ind),3))
+
+            # if treshold shall be learned, another target signal needs to be added. 
+            # No gestures signal is 1 if all other targets are 0 and -1 otherwise.
+            if learnTreshold:
+                t = np.append(t,1-2*t.max(1, keepdims=True),1)
+
+            self.train_data.append((ind,t))
+            
+            
+        # ===================================================================
+        # Create testset
+        # ===================================================================
+        dataStep = []
+        for fileName in testFiles:
+            ind, t  = createData(fileName, inputGestures,usedGestures, dataDir=dataDir)
+            dataStep.append((ind,t))
+        
+        if shuffle:
+            test_data = shuffleDataStep(dataStep, nFolds=1, nRepeat=1)
+        self.test_data = test_data
+
+
+    def __len__(self):
+        if self.train:
+            return len(self.train_data)
+        else:
+            return len(self.test_data)
+
+    def __getitem__(self, idx):
+        if self.train:
+            inputs, targets = self.train_data[idx]
+        else:
+            inputs, targets = self.test_data[idx]
+        
+        inputs /= self.normalizer
+        
+        return inputs, targets
+
+
+
+
+
 class DataSet(object):
     
     #fused = np.empty((0,0))
