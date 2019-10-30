@@ -45,7 +45,6 @@ def calcMaxActivityPrediction(prediction_orig, target_orig, treshold, gestureMin
         while j < prediction.shape[0] and posSum > treshold[j]: # while the sum of all output neurons is above the treshold shift j 
             posSum = np.sum(prediction[j,:][prediction[j,:]>0])
             j +=1 #after this loop, j is the end of the found segment
-            
         if j - i > gestureMinLength: #if the segments (from i to j) is longer than the minumum number of timesteps       
             start = i #i is segment start
             end = j #j is segment end
@@ -73,6 +72,9 @@ def calcMaxActivityPrediction(prediction_orig, target_orig, treshold, gestureMin
 # returns two lists: predicted label and true label. Segments are NOT ordered anymore. 
 #===============================================================================
 def calcInputSegmentSeries(prediction, target, treshold, plot=False):
+    
+    assert type(treshold) == float, 'Using a dynamic treshold not yet supported, use a float for constant threshold instead.'
+    
     prediction = addTresholdSignal(prediction, treshold) #add threshold to prediction represent no gesture.
     target = addNoGestureSignal(target) #add no gesture to target as well
     predictionInt = np.argmax(prediction, 1) #convert binary prediction matrix to list of intergers
@@ -86,7 +88,7 @@ def calcInputSegmentSeries(prediction, target, treshold, plot=False):
     
     
     if plot :
-        plt.figure()
+        plt.figure(figsize=(20,3))
         cmap = mpl.cm.gist_earth
         for i in range(prediction.shape[1]):
             plt.plot(prediction[:,i],c=cmap(float(i)/(prediction.shape[1])))
