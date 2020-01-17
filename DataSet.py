@@ -91,6 +91,8 @@ class UniHHIMUGestures(TorchDataset):
         
         if shuffle:
             test_data = shuffleDataStep(dataStep, nFolds=1, nRepeat=1)
+        else:
+            print("WARNING: set shuffle to true, there's a bug somewhere in the input scaling otherwise")
         self.test_data = test_data
 
 
