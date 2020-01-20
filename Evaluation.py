@@ -241,11 +241,14 @@ def addNoGestureSignal(target):
 # Plots a given confusion matrix
 #===============================================================================
 def plot_confusion_matrix(cm, gestures=None,title='Confusion matrix', cmap=cm.Blues):
+    old_font = matplotlib.rcParams.get('font.size')
+    matplotlib.rcParams.update({'font.size': 20})
+    
     fig = plt.figure(figsize=(15,15))
-    maxVal = np.max(cm.flatten()[:-1])
+    maxVal = np.max(cm.flatten()[:-1]) + 2
     plt.imshow(cm, interpolation='nearest', cmap=cmap, vmin=0, vmax=maxVal)
     plt.title(title)
-    plt.colorbar()
+    #plt.colorbar()
     if gestures is not None:
         tick_marks = np.arange(len(gestures))
         plt.xticks(tick_marks, gestures, rotation=45)
@@ -262,6 +265,8 @@ def plot_confusion_matrix(cm, gestures=None,title='Confusion matrix', cmap=cm.Bl
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
+
+    matplotlib.rcParams.update({'font.size': old_font})
     
     return fig
 
