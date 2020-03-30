@@ -41,9 +41,9 @@ def calcMaxActivityPrediction(prediction_orig, target_orig, treshold, gestureMin
     
     while i < prediction.shape[0]: #iterate over all timesteps
         j = i 
-        posSum = np.sum(prediction[j,:][prediction[j,:]>0]) #sum up all neuron output above zero
+        posSum = np.sum(prediction[j,:][prediction[j,:]>0.]) #sum up all neuron output above zero
         while j < prediction.shape[0] and posSum > treshold[j]: # while the sum of all output neurons is above the treshold shift j 
-            posSum = np.sum(prediction[j,:][prediction[j,:]>0])
+            posSum = np.sum(prediction[j,:][prediction[j,:]>0.])
             j +=1 #after this loop, j is the end of the found segment
         if j - i > gestureMinLength: #if the segments (from i to j) is longer than the minumum number of timesteps       
             start = i #i is segment start
