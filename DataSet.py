@@ -16,7 +16,7 @@ class UniHHIMUGestures(TorchDataset):
 
     def __init__(self, 
                  dataDir='dataSets/',
-                 inputFiles=['nike','julian','nadja','line'], testFiles=['stephan'], train=True, 
+                 inputFiles=['ni','j','na','l'], testFiles=['s'], train=True, 
                  inputGestures=[0,1,2,3,4,5,6,7,8,9], 
                  usedGestures=[0,1,2,3,4,5,6,7,8,9], 
                  useNormalized=2, 
